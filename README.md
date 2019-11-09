@@ -9,7 +9,7 @@ In the case that NX is DISABLED, we will not need to use ROP.
 All binaries in this challenge come with NX enabled, and have the same vulnerability that allows us to smash the stack and overwrite the RIP.
 The POC of every executable is the same, a simple stack smash and RIP overwrite with the same cyclic offset each time.
 To craft out payload for each executable we simply send in 40 bytes of junk (ex. the letter A 40 times) and append any addresses and values we need to.
-This was found using peda's pattern tool by sending in a generated pattern of length 50 as input (`pattern create 50`), and then using `pattern search` to find the offset to the RIP.
+This was found using peda's pattern tool by sending in a generated pattern of length 50 as input (`pattern create 50`), and then using `pattern search` to find the offset to the RSP.
 
 ![smashed stack](smashed-stack.png)
 
