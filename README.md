@@ -55,3 +55,28 @@ So our payload will consist of the address of the gadget, followed by the addres
 The overwritten return will go to the gadget (popping the gadget address into the RIP), then the gadget will pop the address of the string into rdi and return to the next value on the stack, which will execute system and conclude the exploit.
 
 ![flag](split/flag.png)
+
+
+
+## 3. [callme](https://ropemporium.com/challenge/callme.html)
+This challenge seems a bit different from the ones we've seen so far, but at the same time it isn't too bad once you read up on the plt.
+The guts of this seem to be: load up the registers using the given gadgets, call the function, and repeat two more times.
+
+![gadgets](callme/gadgets.png)
+![relocations](callme/relocations.png)
+
+To load the function arguments, we put the arguments we want in order on the stack and call the gadget, popping the values into the registers we need them in.
+Afterwards, we get the gadget to return to the location of the function we want to call.
+
+![fail](callme/fail.png)
+
+... and it failed. This is weird. Since it's a segfault with no strange looking values anywhere important, maybe we weren't supposed to go to the relocation address? What exactly is a relocation? It looks like I don't actually know yet.
+After doing a bit more [research](https://www.technovelty.org/linux/plt-and-got-the-key-to-code-sharing-and-dynamic-libraries.html), it looks like relocations are just placeholders in a binary that point somewhere else. Looking at the instructions around the instructions pointer, I can see that the address of a relocation is the address of a function in the got.plt, lining up with our knowledge of the got.plt [being an array of function pointers](https://systemoverlord.com/2017/03/19/got-and-plt-for-pwning.html).
+Putting this address in the RIP is definitely not what we want, and what we were actually looking for was the location of the function in the plt since that would lead directly to the actual function call.
+We can find the addresses of our functions in the .plt by using `rabin2 -i callme`.
+
+![plt](callme/plt.png)
+
+Replacing the redirection addresses in our exploit with these lead to a successful flag capture.
+
+![flag](callme/flag.png)
